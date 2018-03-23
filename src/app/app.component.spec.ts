@@ -1,27 +1,53 @@
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, async, ComponentFixture } from '@angular/core/testing';
+import { StubbedComponent, ComponentStub } from "ng-stubs";
 import { AppComponent } from './app.component';
+import { GreeterComponent } from './greeter/greeter.component';
+import { By } from '@angular/platform-browser';
+
 describe('AppComponent', () => {
+
+  let fixture: ComponentFixture<AppComponent>;
+  let app: AppComponent;
+
+  let greeterComponentStub: StubbedComponent<GreeterComponent>;
+
   beforeEach(async(() => {
+    greeterComponentStub = ComponentStub(GreeterComponent)
+
     TestBed.configureTestingModule({
-      declarations: [
-        AppComponent
-      ],
+      declarations:
+        [
+          AppComponent,
+          greeterComponentStub.type
+        ]
     }).compileComponents();
   }));
-  it('should create the app', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
-    expect(app).toBeTruthy();
-  }));
-  it(`should have as title 'app'`, async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('app');
-  }));
-  it('should render title in a h1 tag', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(AppComponent);
+    app = fixture.componentInstance;
+
     fixture.detectChanges();
-    const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to app!');
-  }));
+  });
+
+  it('should create the app', () => {
+    expect(app).toBeTruthy();
+  });
+
+  it('binds the name to the greeter', () => {
+    expect(greeterComponentStub.instance.name).toEqual(app.name);
+
+    app.name = "Tester";
+    fixture.detectChanges();
+
+    expect(greeterComponentStub.instance.name).toEqual("Tester");
+  });
+
+  it('shows the greeter`s result', async(() => {
+    greeterComponentStub.instance.greet.emit("Hi, Tester");
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css(".greeting")).nativeElement.textContent).toEqual("Hi, Tester");
+  })
+
 });
